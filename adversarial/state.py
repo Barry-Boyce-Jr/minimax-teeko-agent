@@ -12,6 +12,8 @@ RED_PIECES = 2
 BLACK = "B"
 RED = "R"
 UNPLACED = 0
+WIN_LENGTH = 4
+NUM_SQUARES = BOARD_SIZE * BOARD_SIZE
 
 # Function Name: make_state
 # Description:   builds a state, sorting each player's pieces in ascending order
@@ -69,3 +71,9 @@ def convert_square(row, column):
 # Return Value:  true if on the board, otherwise false
 def on_board(row, column):
     return 0 <= row < BOARD_SIZE and 0 <= column < BOARD_SIZE
+
+def player_switch(player):
+    if player == BLACK:
+        return RED
+    else:
+        return BLACK

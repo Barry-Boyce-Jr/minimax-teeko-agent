@@ -5,7 +5,7 @@
 # project3
 # rules.py
 
-from state import make_state, get_pieces, get_placed_pieces, convert_row_column, convert_square, on_board, NUM_SQUARES, PLAYER, BLACK_PIECES, RED_PIECES, BLACK, RED, UNPLACED
+from state import make_state, get_pieces, get_placed_pieces, convert_row_column, convert_square, on_board, NUM_SQUARES, PLAYER, BLACK_PIECES, RED_PIECES, BLACK, RED, UNPLACED, WIN_LENGTH, BOARD_SIZE, player_switch
 
 
 DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1),
