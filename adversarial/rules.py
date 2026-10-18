@@ -5,7 +5,7 @@
 # project3
 # rules.py
 
-from state import make_state, get_pieces, get_placed_pieces, convert_row_column, convert_square, on_board, NUM_SQUARES, PLAYER, BLACK_PIECES, RED_PIECES, BLACK, RED, UNPLACED, WIN_LENGTH, BOARD_SIZE, player_switch
+from state import make_state, get_pieces, get_placed_pieces, convert_row_column, convert_square, on_board, NUM_SQUARES, PLAYER, BLACK_PIECES, RED_PIECES, BLACK, RED, UNPLACED, WIN_LENGTH, BOARD_SIZE
 
 
 DIRECTIONS = [(-1, -1), (-1, 0), (-1, 1),
@@ -123,3 +123,108 @@ def make_move(state, next_move):
     else:
         new_state = make_state(BLACK, state[BLACK_PIECES], pieces)
     return new_state
+
+# Function Name: line_squares
+# Description:   builds a line of 4 squares 
+# Parameters:    row - starting row
+#                column - starting column
+#                row_step - row change for each step of the line
+#                column_step - column change for each step of the line
+# Return Value:  list of 4 squares or none if the line runs off the board
+def line_squares(row, column, row_step, column_step):
+    line = []
+    for step in range(WIN_LENGTH):
+        #stops if the line goes off the board
+        if not on_board(row, column):
+            return None
+        line.append(convert_square(row, column))
+        #moves one step in the line's direction
+        row = row + row_step
+        column = column + column_step
+    return line
+
+# Function Name: build_win_configurations
+# Description:   lists every group of 4 squares that wins the game
+# Parameters:    none
+# Return Value:  list of lists of 4 squares
+def build_win_configurations():
+    configurations = []
+
+    #horizontal lines
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            line = line_squares(row, column, 0, 1)
+            if line is not None:
+                configurations.append(line)
+
+    #vertical lines
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            line = line_squares(row, column, 1, 0)
+            if line is not None:
+                configurations.append(line)
+
+    #diagonal lines going down-right
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            line = line_squares(row, column, 1, 1)
+            if line is not None:
+                configurations.append(line)
+
+    #diagonal lines going down-left
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            line = line_squares(row, column, 1, -1)
+            if line is not None:
+                configurations.append(line)
+
+    #2x2 blocks
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            #skips blocks that run off board
+            if not on_board(row + 1, column + 1):
+                continue
+            block = [convert_square(row, column), convert_square(row, column + 1),
+                     convert_square(row + 1, column), convert_square(row + 1, column + 1)]
+            configurations.append(block)
+
+    #tilted squares
+    for row in range(BOARD_SIZE):
+        for column in range(BOARD_SIZE):
+            #skips tilted squares whose center is on an edge
+            if not on_board(row - 1, column - 1) or not on_board(row + 1, column + 1):
+                continue
+            tilted = [convert_square(row - 1, column), convert_square(row, column - 1),
+                      convert_square(row, column + 1), convert_square(row + 1, column)]
+            configurations.append(tilted)
+
+    return configurations
+
+WIN_CONFIGURATIONS = build_win_configurations()
+
+# Function Name: is_win
+# Description:   checks whether a player has 4 pieces in any winning shape
+# Parameters:    state - state tuple
+#                player - BLACK or RED
+# Return Value:  true if the player has won, else false
+def is_win(state, player):
+    pieces = get_placed_pieces(state, player)
+    for configuration in WIN_CONFIGURATIONS:
+        #counts how many of the configuration's squares the player has
+        count = 0
+        for square in configuration:
+            if square in pieces:
+                count += 1
+        if count == WIN_LENGTH:
+            return True
+    return False
+
+# Function Name: terminal_test
+# Description:   checks whether the game is over, either player has won or
+#                the player to move has no legal moves
+# Parameters:    state - state tuple
+# Return Value:  true if the game is over, otherwise false
+def terminal_test(state):
+    if is_win(state, BLACK) or is_win(state, RED):
+        return True
+    return len(get_moves(state)) == 0
